@@ -1,48 +1,58 @@
 version: '3'
 networks:
-  distributed:
-    internal: true
+ distributed:
+  #  internal: true
 services:
+  db:
+    restart: on-failure
+    container_name: db
+    image: postgres
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+    - "5432:5432"
+    volumes:
+    - progresDB_data:/var/lib/postgresql/data
+    - ./database/postgres.conf:/database/config/postgres.conf
+    networks:
+    - distributed
   nginx:
+    container_name: loadbalancer
+    depends_on: 
+    - backend
+    - frontend
+    restart: always
     build: ./application/nginx
+    ports:
+    - 8081:80
+    networks:
+    - distributed
+  frontend:
+    container_name: frontend
+    build: ./application
     ports:
      - "8080:8080"
     depends_on:
-      #- frontend
-      - backend
+     - backend
     networks:
-      - distributed
-  #frontend:
-  #  build: ./application
-   # ports:
-   #   - "8080:8080"
-   # depends_on:
-    #  - backend
-    #networks:
-     # - distributed
+    - distributed
   backend:
+    container_name: backend
+    restart: always
     build: ./application/api
-   # ports:
-    #  - "1337:1337"
+    ports:
+      - "1337:1337"
     depends_on:
       - db
     environment:
-      - DATABASE_HOST=db
-      - DATABASE_USER=root 
-      - DATABASE_PASSWORD=password 
-      - DATABASE_NAME=mydatabase 
+       DATABASE_PASSWORD: password 
+       DATABASE_NAME: mydatabase 
+       DATABASE_USER: postgres
+       DATABASE_PORT: 5432
     networks:
       - distributed
-  db:
-    image: mysql:8.0
-    restart: always
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=mydatabase
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-
 volumes:
-  db_data:
+  progresDB_data:
