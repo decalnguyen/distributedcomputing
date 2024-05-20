@@ -1,11 +1,11 @@
-FROM node:16-alpine as build
+FROM node:16-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-
-RUN npm ci
+ADD package*.json ./app
 
 COPY . . 
+
+RUN npm install
 
 CMD ["npm", "run", "develop"]

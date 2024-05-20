@@ -27,14 +27,14 @@ services:
     restart: always
     build: ./application/nginx
     ports:
-    - 8080:80
+    - 8081:80
     networks:
     - distributed
   frontend:
     container_name: frontend
     build: ./application
     ports:
-     - "3000:80"
+     - "8080:8080"
     depends_on:
      - backend
     networks:
@@ -44,11 +44,9 @@ services:
     restart: always
     build: ./application/api
     ports:
-      - "1337:80"
+      - "1337:1337"
     depends_on:
       - db
-    volumes:
-     - ./api:/app
     environment:
        DATABASE_PASSWORD: password 
        DATABASE_NAME: mydatabase 
