@@ -2,12 +2,10 @@ FROM node:16-alpine as build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 RUN npm ci
 
 COPY . . 
 
-EXPOSE 1337 
-
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "develop"]
