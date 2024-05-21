@@ -16,7 +16,7 @@ RUN npm run build
 
 FROM node:18-alpine AS product
 
-RUN apk add --no-cache vips-dev
+#RUN apk add --no-cache vips-dev
 
 WORKDIR /opt
 
