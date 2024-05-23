@@ -47,3 +47,15 @@ spec:
           limits:
             cpu: "300m"   # 1000 milliCPU (one CPU core)
             memory: "1000Mi"  # 512 MiB of memory
+---
+apiVersion: v1 
+kind: Service 
+metadata:
+  name: backend-service
+spec: 
+  selector: 
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 1337 
+      targetPort: 1337
