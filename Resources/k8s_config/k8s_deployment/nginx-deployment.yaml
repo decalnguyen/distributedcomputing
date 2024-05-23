@@ -1,0 +1,48 @@
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: nginx
+    name: nginx
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: nginx
+    strategy: {}
+    template:
+      metadata:
+        labels:
+          app: nginx
+      spec:
+        containers:
+        - image: decalnguyen/nginx:1.0
+          imagePullPolicy: ""
+          name: loadbalancer
+          ports:
+          - containerPort: 80
+          resources: 
+            requests:
+              cpu: "200m"    # 500 milliCPU (half a CPU core)
+              memory: "200Mi"  # 256 MiB of memory
+            limits:
+              cpu: "300m"   # 1000 milliCPU (one CPU core)
+              memory: "300Mi"  # 512 MiB of memory
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+    name: nginx
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "80"
+    port: 80
+    targetPort: 80
+  selector:
+    app: nginx

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata: 
+  name: frontend-deployment
+  labels: 
+    app: frontend 
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: frontend 
+  template: 
+    metadata:
+      labels:
+        app: frontend
+    spec: 
+      containers:
+      - image: decalnguyen/frontend:1.0
+        name: frontend 
+        ports: 
+        - containerPort: 8080
+        resources:
+          requests: 
+            cpu: "100m"
+            memory: "256Mi" 
+          limits: 
+            cpu: "200m" 
+            memory: "2012Mi"  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-deployment
+  labels:  
+    app: frontend  
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 8080
+    targetPort: 8080
