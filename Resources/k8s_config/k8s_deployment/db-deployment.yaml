@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment 
 metadata: 
   labels:
-    app: db 
+    app: db
   name: db
 spec:
   replicas: 1
@@ -15,7 +15,7 @@ spec:
         app: db
     spec:
       containers: 
-      - image: mysql:latest 
+      - image: mysql
         name: db
         env:
         - name: MYSQL_ROOT_PASSWORD
@@ -36,15 +36,45 @@ spec:
             memory: "200Mi"
           limits:
             cpu: "300m"
-            memory: "300Mi"
-        volumeMounts:
-        - mountPath: /var/lib/mysql
-          name: mysql-data
-      restartPolicy: Always
-      volumes:
-        - name: mysql-data 
-          persistentVolumeClaim:
-            claimName: mysql-data
+            memory: "500Mi"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: db
+  spec:
+    containers:
+    - env:
+      - name: MYSQL_ROOT_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: rp
+      - name: MYSQL_DATABASE
+        valueFrom: 
+          secretKeyRef:
+            name: mysecret
+            key: db
+      image: mysql
+      name: db
+      ports:
+      - containerPort: 3306
+      resources: 
+        requests:
+          cpu: "200m"    # 500 milliCPU (half a CPU core)
+          memory: "200Mi"  # 256 MiB of memory
+        limits:
+          cpu: "300m"   # 1000 milliCPU (one CPU core)
+          memory: "500Mi"  # 512 MiB of memory
+      volumeMounts:
+      - mountPath: /var/lib/mysql
+        name: mysql-data
+    restartPolicy: OnFailure
+    volumes:
+    - name: mysql-data
+      persistentVolumeClaim:
+        claimName: mysql-data
 ---
 apiVersion: v1 
 kind: Service 
