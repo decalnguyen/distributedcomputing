@@ -4,6 +4,7 @@ metadata:
   name: backend-deployment
   labels:
     app: backend
+  namespace: myapp
 spec:
   replicas: 1
   selector:
@@ -51,7 +52,8 @@ spec:
 apiVersion: v1 
 kind: Service 
 metadata:
-  name: backend-service
+  name: backend
+  namespace: myapp
 spec: 
   selector: 
     app: backend

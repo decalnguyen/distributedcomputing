@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myingress
+  namespace: myapp
+spec:
+  ingressClassName: nginx-service
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /admin
+        backend:
+          serviceName: backend
+          port: 
+            number: 1337
+        #  servicePort: 1337 
+      - path: /student 
+        backend: 
+          serviceName: frontend
+         # servicePort: 8080
+          port: 
+            number: 8080

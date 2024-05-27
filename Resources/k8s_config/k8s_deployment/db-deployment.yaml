@@ -4,6 +4,7 @@ metadata:
   labels:
     app: db
   name: db
+  namespace: myapp
 spec:
   replicas: 1
   selector:
@@ -43,6 +44,7 @@ kind: Pod
 metadata:
   labels:
     app: db
+  namespace: myapp
   spec:
     containers:
     - env:
@@ -79,7 +81,8 @@ metadata:
 apiVersion: v1 
 kind: Service 
 metadata:
-  name: db-service
+  name: db
+  namespace: myapp
 spec: 
   selector:
     app: db
