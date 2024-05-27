@@ -1,23 +1,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: myingress
-  namespace: myapp
+  name: example-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
-  ingressClassName: nginx-service
   rules:
-  - host: localhost
-    http:
-      paths:
-      - path: /admin
-        backend:
-          serviceName: backend
-          port: 
-            number: 1337
-        #  servicePort: 1337 
-      - path: /student 
-        backend: 
-          serviceName: frontend
-         # servicePort: 8080
-          port: 
-            number: 8080
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-deployment
+                port:
+                  number: 8080
