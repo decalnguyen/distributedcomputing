@@ -29,7 +29,7 @@ module.exports = createCoreController('api::student.student', ({strapi}) => ({
         }
         let now = new Date()
         let emailToken = Date.parse(now) + this.makeid(15)
-        let link = `http://localhost:8080/#/verification?code=${emailToken}`
+        let link = `http://localhost:8080/verification?code=${emailToken}`
         let sendMail = sendEmailVerification(bodyData.email, link)
         let register = await strapi.entityService.create('api::student.student', {
             data: {
