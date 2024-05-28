@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.network/distributed: "true"
+    io.kompose.service: db
+  name: db
+spec:
+  containers:
+  - env:
+    - name: MYSQL_DATABASE
+      value: mydatabase
+    - name: MYSQL_ROOT_PASSWORD
+      value: password
+    image: mysql
+    name: db
+    ports:
+    - containerPort: 3306
+    resources: {}
+    volumeMounts:
+    - mountPath: /var/lib/mysql
+      name: mysql-data
+  restartPolicy: OnFailure
+  volumes:
+  - name: mysql-data
+    persistentVolumeClaim:
+      claimName: mysql-data
+status: {}

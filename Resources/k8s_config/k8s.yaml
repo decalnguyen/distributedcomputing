@@ -1,0 +1,837 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: backend
+    name: backend
+  spec:
+    ports:
+    - name: "1337"
+      port: 1337
+      targetPort: 1337
+    selector:
+      io.kompose.service: backend
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: cadvisor
+    name: cadvisor
+  spec:
+    ports:
+    - name: "8081"
+      port: 8081
+      targetPort: 8080
+    selector:
+      io.kompose.service: cadvisor
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: db
+    name: db
+  spec:
+    ports:
+    - name: "3306"
+      port: 3306
+      targetPort: 3306
+    selector:
+      io.kompose.service: db
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: frontend
+    name: frontend
+  spec:
+    ports:
+    - name: "8080"
+      port: 8080
+      targetPort: 8080
+    selector:
+      io.kompose.service: frontend
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: grafana
+    name: grafana
+  spec:
+    ports:
+    - name: "3000"
+      port: 3000
+      targetPort: 3000
+    selector:
+      io.kompose.service: grafana
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: nginx
+    name: nginx
+  spec:
+    type: LoadBalancer
+    ports:
+    - name: "80"
+      port: 80
+      targetPort: 80
+    selector:
+      io.kompose.service: nginx
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: prometheus
+    name: prometheus
+  spec:
+    ports:
+    - name: "9090"
+      port: 9090
+      targetPort: 9090
+    selector:
+      io.kompose.service: prometheus
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: pushgateway
+    name: pushgateway
+  spec:
+    ports:
+    - name: "9091"
+      port: 9091
+      targetPort: 9091
+    selector:
+      io.kompose.service: pushgateway
+  status:
+    loadBalancer: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: backend
+    name: backend
+  spec:
+    replicas: 3
+    selector:
+      matchLabels:
+        io.kompose.service: backend
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+            -o k8s.yaml
+          kompose.version: 1.21.0 (992df58d8)
+        labels:
+          io.kompose.network/distributed: "true"
+          io.kompose.service: backend
+      spec:
+        containers:
+        - env:
+          - name: DATABASE_NAME
+            value: mydatabase
+          - name: DATABASE_PASSWORD
+            value: password
+          - name: DATABASE_PORT
+            value: "3306"
+          - name: DATABASE_USER
+            value: mysql
+          image: decalnguyen/backend:1.0
+          imagePullPolicy: ""
+          name: backend
+          ports:
+          - containerPort: 1337
+          resources:
+            requests:
+              cpu: "200m"    # 500 milliCPU (half a CPU core)
+              memory: "200Mi"  # 256 MiB of memory
+            limits:
+              cpu: "300m"   # 1000 milliCPU (one CPU core)
+              memory: "1000Mi"  # 512 MiB of memory
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+  status: {}
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: distributed
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/distributed: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/distributed: "true"
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: cadvisor
+    name: cadvisor
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: cadvisor
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+            -o k8s.yaml
+          kompose.version: 1.21.0 (992df58d8)
+        labels:
+          io.kompose.network/distributed: "true"
+          io.kompose.service: cadvisor
+      spec:
+        containers:
+        - image: gcr.io/cadvisor/cadvisor:latest
+          imagePullPolicy: ""
+          name: cadvisor
+          ports:
+          - containerPort: 8080
+          resources: 
+            requests:
+              cpu: "200m"    # 500 milliCPU (half a CPU core)
+              memory: "200Mi"  # 256 MiB of memory
+            limits:
+              cpu: "300m"   # 1000 milliCPU (one CPU core)
+              memory: "300Mi"  # 512 MiB of memory
+          volumeMounts:
+          - mountPath: /rootfs
+            name: cadvisor-claim0
+            readOnly: true
+          - mountPath: /var/run
+            name: cadvisor-claim1
+          - mountPath: /sys
+            name: cadvisor-claim2
+            readOnly: true
+          - mountPath: /var/lib/docker
+            name: cadvisor-claim3
+            readOnly: true
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes:
+        - name: cadvisor-claim0
+          persistentVolumeClaim:
+            claimName: cadvisor-claim0
+            readOnly: true
+        - name: cadvisor-claim1
+          persistentVolumeClaim:
+            claimName: cadvisor-claim1
+        - name: cadvisor-claim2
+          persistentVolumeClaim:
+            claimName: cadvisor-claim2
+            readOnly: true
+        - name: cadvisor-claim3
+          persistentVolumeClaim:
+            claimName: cadvisor-claim3
+            readOnly: true
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      io.kompose.service: cadvisor-claim0
+    name: cadvisor-claim0
+  spec:
+    accessModes:
+    - ReadOnlyMany
+    resources:
+        requests:
+          cpu: "200m"    # 500 milliCPU (half a CPU core)
+          memory: "200Mi"  # 256 MiB of memory
+          storage: 100Mi 
+        limits:
+          cpu: "300m"   # 1000 milliCPU (one CPU core)
+          memory: "300Mi"  # 512 MiB of memory
+          storage: 100Mi         
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      io.kompose.service: cadvisor-claim1
+    name: cadvisor-claim1
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+        requests:
+          cpu: "200m"    # 500 milliCPU (half a CPU core)
+          memory: "200Mi"  # 256 MiB of memory
+          storage: 100Mi 
+        limits:
+          cpu: "300m"   # 1000 milliCPU (one CPU core)
+          memory: "300Mi"  # 512 MiB of memory
+          storage: 200Mi 
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      io.kompose.service: cadvisor-claim2
+    name: cadvisor-claim2
+  spec:
+    accessModes:
+    - ReadOnlyMany
+    resources:
+       requests:
+          cpu: "200m"    # 500 milliCPU (half a CPU core)
+          memory: "200Mi"  # 256 MiB of memory
+          storage: 100Mi 
+       limits:
+          cpu: "300m"   # 1000 milliCPU (one CPU core)
+          memory: "300Mi"  # 512 MiB of memory
+          storage: 200Mi 
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      io.kompose.service: cadvisor-claim3
+    name: cadvisor-claim3
+  spec:
+    accessModes:
+    - ReadOnlyMany
+    resources:
+        requests:
+          cpu: "200m"    # 500 milliCPU (half a CPU core)
+          memory: "200Mi"  # 256 MiB of memory
+          storage: 100Mi 
+        limits:
+          cpu: "300m"   # 1000 milliCPU (one CPU core)
+          memory: "300Mi"  # 512 MiB of memory
+          storage: 200Mi 
+  status: {}
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: distributed
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/distributed: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/distributed: "true"
+- apiVersion: apps/v1
+  kind: Deployment 
+  metadata: 
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: db 
+    name: db
+  spec:
+   replicas: 2
+   selector:
+    matchLabels:
+      io.kompose.service: db
+   template: 
+      metadata:
+        annotations:
+          kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert
+          kompose.version: 1.21.0 (992df58d8)
+        labels: 
+         io.kompose.network/distributed: "true"
+         io.kompose.service: db
+      spec:
+        containers: 
+        - image: mysql 
+          imagePullPolicy: ""
+          name: db
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: password
+          - name: MYSQL_DATABASE
+            value: mydatabase
+          ports:
+          - containerPort: 3306
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    labels:
+      io.kompose.network/distributed: "true"
+      io.kompose.service: db
+    name: db
+  spec:
+    containers:
+    - env:
+      - name: MYSQL_DATABASE
+        value: mydatabase
+      - name: MYSQL_ROOT_PASSWORD
+        value: password
+      image: mysql
+      name: db
+      ports:
+      - containerPort: 3306
+      resources: 
+        requests:
+          cpu: "200m"    # 500 milliCPU (half a CPU core)
+          memory: "200Mi"  # 256 MiB of memory
+        limits:
+          cpu: "300m"   # 1000 milliCPU (one CPU core)
+          memory: "300Mi"  # 512 MiB of memory
+      volumeMounts:
+      - mountPath: /var/lib/mysql
+        name: mysql-data
+    restartPolicy: OnFailure
+    volumes:
+    - name: mysql-data
+      persistentVolumeClaim:
+        claimName: mysql-data
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      io.kompose.service: mysql-data
+    name: mysql-data
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 100Mi
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: distributed
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/distributed: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/distributed: "true"
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: frontend
+    name: frontend
+  spec:
+    replicas: 3
+    selector:
+      matchLabels:
+        io.kompose.service: frontend
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+            -o k8s.yaml
+          kompose.version: 1.21.0 (992df58d8)
+        labels:
+          io.kompose.network/distributed: "true"
+          io.kompose.service: frontend
+      spec:
+        containers:
+        - image: decalnguyen/frontend:1.0
+          imagePullPolicy: ""
+          name: frontend
+          ports:
+          - containerPort: 8080
+          resources: 
+            requests:
+              cpu: "500m"    # 500 milliCPU (half a CPU core)
+              memory: "256Mi"  # 256 MiB of memory
+            limits:
+              cpu: "1000m"   # 1000 milliCPU (one CPU core)
+              memory: "2012Mi"  # 512 MiB of memory
+
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+  status: {}
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: distributed
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/distributed: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/distributed: "true"
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: grafana
+    name: grafana
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: grafana
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+            -o k8s.yaml
+          kompose.version: 1.21.0 (992df58d8)
+        labels:
+          io.kompose.network/distributed: "true"
+          io.kompose.service: grafana
+      spec:
+        containers:
+        - image: grafana/grafana
+          imagePullPolicy: ""
+          name: grafana
+          ports:
+          - containerPort: 3000
+          resources: 
+            requests:
+              cpu: "200m"    # 500 milliCPU (half a CPU core)
+              memory: "200Mi"  # 256 MiB of memory
+            limits:
+              cpu: "300m"   # 1000 milliCPU (one CPU core)
+              memory: "300Mi"  # 512 MiB of memory
+          volumeMounts:
+          - mountPath: /var/lib/grafana
+            name: grafana-storage
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes:
+        - name: grafana-storage
+          persistentVolumeClaim:
+            claimName: grafana-storage
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      io.kompose.service: grafana-storage
+    name: grafana-storage
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+        requests:
+          cpu: "200m"    # 500 milliCPU (half a CPU core)
+          memory: "200Mi"  # 256 MiB of memory
+          storage: 100Mi
+        limits:
+          cpu: "300m"   # 1000 milliCPU (one CPU core)
+          memory: "300Mi"  # 512 MiB of memory
+          storage: 200Mi
+  status: {}
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: distributed
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/distributed: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/distributed: "true"
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: nginx
+    name: nginx
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: nginx
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+            -o k8s.yaml
+          kompose.version: 1.21.0 (992df58d8)
+        labels:
+          io.kompose.network/distributed: "true"
+          io.kompose.service: nginx
+      spec:
+        containers:
+        - image: decalnguyen/nginx:1.0
+          imagePullPolicy: ""
+          name: loadbalancer
+          ports:
+          - containerPort: 80
+          resources: 
+            requests:
+              cpu: "200m"    # 500 milliCPU (half a CPU core)
+              memory: "200Mi"  # 256 MiB of memory
+            limits:
+              cpu: "300m"   # 1000 milliCPU (one CPU core)
+              memory: "300Mi"  # 512 MiB of memory
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+  status: {}
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: distributed
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/distributed: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/distributed: "true"
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: prometheus
+    name: prometheus
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: prometheus
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+            -o k8s.yaml
+          kompose.version: 1.21.0 (992df58d8)
+        labels:
+          io.kompose.network/distributed: "true"
+          io.kompose.service: prometheus
+      spec:
+        containers:
+        - args:
+          - --config.file=/etc/prometheus/prometheus.yml
+          - --storage.tsdb.path=/prometheus
+          - --web.console.libraries=/etc/prometheus/console_libraries
+          - --web.console.templates=/etc/prometheus/consoles
+          - --web.enable-lifecycle
+          image: decalnguyen/prometheus:1.0
+          imagePullPolicy: ""
+          name: prometheus
+          ports:
+          - containerPort: 9090
+          resources: 
+             requests:
+              cpu: "200m"    # 500 milliCPU (half a CPU core)
+              memory: "200Mi"  # 256 MiB of memory
+             limits:
+              cpu: "300m"   # 1000 milliCPU (one CPU core)
+              memory: "300Mi"  # 512 MiB of memory
+          volumeMounts:
+          - mountPath: /prometheus
+            name: prometheus-data
+          - mountPath: /etc/prometheus/prometheus.yml
+            name: prometheus-claim1
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes:
+        - name: prometheus-data
+          persistentVolumeClaim:
+            claimName: prometheus-data
+        - name: prometheus-claim1
+          persistentVolumeClaim:
+            claimName: prometheus-claim1
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      io.kompose.service: prometheus-data
+    name: prometheus-data
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+        requests:
+          cpu: "200m"    # 500 milliCPU (half a CPU core)
+          memory: "200Mi"  # 256 MiB of memory
+          storage: 100Mi 
+        limits:
+          cpu: "300m"   # 1000 milliCPU (one CPU core)
+          memory: "300Mi"  # 512 MiB of memory
+          storage: 200Mi 
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      io.kompose.service: prometheus-claim1
+    name: prometheus-claim1
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+        requests:
+          cpu: "200m"    # 500 milliCPU (half a CPU core)
+          memory: "200Mi"  # 256 MiB of memory
+          storage: 100Mi
+        limits:
+          cpu: "300m"   # 1000 milliCPU (one CPU core)
+          memory: "300Mi"  # 512 MiB of memory
+          storage: 100Mi
+  status: {}
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: distributed
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/distributed: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/distributed: "true"
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+        -o k8s.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      io.kompose.service: pushgateway
+    name: pushgateway
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: pushgateway
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f docker-compose.yml
+            -o k8s.yaml
+          kompose.version: 1.21.0 (992df58d8)
+        labels:
+          io.kompose.network/distributed: "true"
+          io.kompose.service: pushgateway
+      spec:
+        containers:
+        - image: prom/pushgateway
+          imagePullPolicy: ""
+          name: pushgateway
+          ports:
+          - containerPort: 9091
+          resources: 
+            requests:
+              cpu: "100m"    # 500 milliCPU (half a CPU core)
+              memory: "200Mi"  # 256 MiB of memory
+            limits:
+              cpu: "200m"   # 1000 milliCPU (one CPU core)
+              memory: "400Mi"  # 512 MiB of memory
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+  status: {}
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: distributed
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/distributed: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/distributed: "true"
+kind: List
+metadata: {}
+

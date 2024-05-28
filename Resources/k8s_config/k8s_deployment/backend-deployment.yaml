@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: decalnguyen/backend:1.0
+        ports:
+        - containerPort: 1337
+        env:
+        - name: DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: db
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: rp 
+        - name: DATABASE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: db_port
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: db_user
+        resources:
+          requests:
+            cpu: "200m"    # 500 milliCPU (half a CPU core)
+            memory: "200Mi"  # 256 MiB of memory
+          limits:
+            cpu: "300m"   # 1000 milliCPU (one CPU core)
+            memory: "1000Mi"  # 512 MiB of memory
+---
+apiVersion: v1 
+kind: Service 
+metadata:
+  name: backend-service
+spec: 
+  selector: 
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 1337 
+      targetPort: 1337

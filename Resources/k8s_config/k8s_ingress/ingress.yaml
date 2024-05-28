@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myingress
+  labels:
+    name: myingress
+spec:
+  rules:
+  - host: myapp.com
+    http:
+      paths:
+      - path: /admin
+        backend:
+          serviceName: backend 
+          servicePort: 1337 
+      - path: /student 
+        backend: 
+          serviceName: frontend
+          servicePort: 8080
